@@ -1,0 +1,68 @@
+#version 460 core
+
+layout(local_size_x = 1, local_size_y = 1, local_size_z = 1) in;
+
+uniform usamplerBuffer texb;
+layout(rgba16f, binding=0)uniform image2D image;
+
+
+
+// coordinates are transposed (row major. where x=y and y=x)
+const ivec2 coord = ivec2(gl_GlobalInvocationID.xy);
+const ivec2 scoord = ivec2(coord.x*2+1,coord.y*2+1);
+
+const vec4 gap = vec4(0.,0.,0.,1.);
+const vec4 nullnode = vec4(0.0625,0.0625,0.0625,1.);
+const float att = 0.5; //0.375
+const vec4 material1 = vec4(0.,1.,1.,1.);
+const vec4 material2 = vec4(1.,1.,0.,1.);
+const vec4 material3 = vec4(1.,0.,1.,1.);
+
+uvec4 pixel = texelFetch(texb,coord.x*int(gl_NumWorkGroups.y)+coord.y);
+uvec4 pixeld = texelFetch(texb,(coord.x-1)*int(gl_NumWorkGroups.y)+coord.y);
+uvec4 pixell = texelFetch(texb,coord.x*int(gl_NumWorkGroups.y)+coord.y-1);
+uvec4 pixelr = texelFetch(texb,coord.x*int(gl_NumWorkGroups.y)+coord.y+1);
+uvec4 pixelu = texelFetch(texb,(coord.x+1)*int(gl_NumWorkGroups.y)+coord.y);
+
+
+void drawNode(vec4 material)
+{
+			imageStore(image,ivec2(scoord.x,scoord.y),material);
+
+			if( (pixeld.x&0x000000ff) == 0x00000000 || coord.x == 0)
+				{imageStore(image,ivec2(scoord.x-1,scoord.y),material*0.1875);}
+			if( (pixell.x&0x000000ff) == 0x00000000 || coord.y == 0)
+				{imageStore(image,ivec2(scoord.x,scoord.y-1),material*0.1875);}
+			imageStore(image,ivec2(scoord.x,scoord.y+1),material*0.1875);
+			imageStore(image,ivec2(scoord.x+1,scoord.y),material*0.1875);
+
+
+			if( (pixel.x&0x00000100) == 0x00000100)
+				{imageStore(image,ivec2(scoord.x,scoord.y+1),material*att);}
+			if( (pixel.x&0x00000200) == 0x00000200)
+				{imageStore(image,ivec2(scoord.x+1,scoord.y-1),material*att);}
+			if( (pixel.x&0x00000400) == 0x00000400)
+				{imageStore(image,ivec2(scoord.x+1,scoord.y),material*att);}
+			if( (pixel.x&0x00000800) == 0x00000800)
+				{imageStore(image,ivec2(scoord.x+1,scoord.y+1),material*att);}
+}
+
+void main()
+{
+
+	switch(pixel.x&0x000000ff)
+	{
+		case 0x00000001:
+			drawNode(material1);
+			break;
+
+		case 0x00000002:
+			drawNode(material2);
+			break;
+
+		case 0x00000003:
+			drawNode(material3);
+			break;
+	}
+
+}
