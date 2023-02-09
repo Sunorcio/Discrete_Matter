@@ -24,7 +24,6 @@
 	#define USR_DEF 1
 	#include "lib/sunostd/frand.h"
 	#include "lib/sdlgl/sdlgl.h"
-	#include <cglm/cglm.h>
 #endif
 
 #ifndef MATTER
