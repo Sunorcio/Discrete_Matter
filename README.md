@@ -1,3 +1,2 @@
 # Discrete_Matter
-
-WIP - this is for testing/backup
+currently just for testing/backup
