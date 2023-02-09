@@ -31,7 +31,7 @@ typedef struct particle
 }node;
 
 //		640	360	(16:9)	^	480 360 (4:3)         (720/2 == 360, min target 1280 720)
-uint16_t worldsize[2] = {48*4,36*4}; // represented grid (x,y)
+uint16_t worldsize[2] = {48*2,36*2}; // represented grid (x,y)
 
 void setFullscreenWindow()
 {
