@@ -101,14 +101,14 @@ void loop()
 			worldLogic();
 			worldBufferUpdate(world);
 
-			glUseProgram(compClear);
-			glDispatchCompute(worldsize[1],worldsize[0],1);
-			glUseProgram(compBuffer);
-			glDispatchCompute(worldsize[1],worldsize[0],1);
+			_sdlgldbg( glUseProgram(compClear); )
+			_sdlgldbg( glDispatchCompute(worldsize[1],worldsize[0],1); )
+			_sdlgldbg( glUseProgram(compBuffer); )
+			_sdlgldbg( glDispatchCompute(worldsize[1],worldsize[0],1); )
 
 
-			glUseProgram(renderProgram);
-			glDrawElements(GL_TRIANGLES, sizeof(eleid), GL_UNSIGNED_BYTE, 0);
+			_sdlgldbg( glUseProgram(renderProgram); )
+			_sdlgldbg( glDrawElements(GL_TRIANGLES, sizeof(eleid), GL_UNSIGNED_BYTE, 0); )
 			SDL_GL_SwapWindow(sdlglWindow);
 		}
 	}
@@ -120,7 +120,7 @@ int main(int argc, char* argv[])
 	srand(time(0));
 	sdlglInit();
 	
-	glClearColor(0.8,0.6,0.8,1.);
+	_sdlgldbg( glClearColor(0.8,0.6,0.8,1.); )
 	setFullscreenWindow();
 	world = worldBufferCreate();
 	renderCreate();
@@ -131,11 +131,10 @@ int main(int argc, char* argv[])
 
 
 
-
 	renderDestroy();
 	worldBufferDestroy(&world);
 
-	catchGLError();
+	catchSDLError(-1);
 	int wawa;
 	glGetIntegerv(GL_MAX_TEXTURE_BUFFER_SIZE, &wawa);
 	SDL_Log("%d",wawa);
