@@ -7,12 +7,10 @@ layout(rgba16f, binding=0)uniform image2D image;
 
 // coordinates are transposed (row major. where x=y and y=x)
 ivec2 coord = ivec2(gl_GlobalInvocationID.xy);
-const ivec2 scoord = ivec2(coord.x*2+1,coord.y*2+1);
+ivec2 scoord = ivec2(coord.x*2+1,coord.y*2+1);
 
 const vec4 gap = vec4(0.,0.,0.,1.);
 const vec4 nullnode = vec4(0.0625,0.0625,0.0625,1.);
-const vec4 material1 = vec4(0.,1.,0.,1.);
-const vec4 material2 = vec4(1.,1.,0.,1.);
 
 void main()
 {
