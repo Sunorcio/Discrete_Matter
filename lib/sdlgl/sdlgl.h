@@ -47,7 +47,7 @@
  // Wrap gl functions with this then declare debug build with -DDBG to print gl errors and their locations in code
  #define _sdlgldbg(x)	catchGLError(); \
 						x; \
-						if(catchGLError()){SDL_Log("in line : %d, function : %s",__LINE__,__FUNCTION__);}
+						if(catchGLError()){SDL_Log("in line : %d, function : %s, file : %s",__LINE__,__FUNCTION__,__FILE__);}
 #else
  #define _sdlgldbg(x) x;
 #endif

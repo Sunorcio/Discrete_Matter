@@ -1,0 +1,10 @@
+Linux
+
+clang matter_main.c -I/usr/local/include/SDL2 -D_REENTRANT -L/usr/local/lib -Wl,-rpath,/usr/local/lib -Wl,--enable-new-dtags -Wl,-Bstatic -lSDL2 -lGLEW -lGLU -Wl,-Bdynamic -lGL -lm -ldl -lpthread -lrt -DDBG -DGLEW_STATIC -O3
+
+
+Windows
+
+x86_64-w64-mingw32-gcc matter_main.c -o win64.exe --static -I/usr/local/x86_64-w64-mingw32/include -I/home/sunorcio/Documents/slib/glew-2.2.0-win32/include -L/usr/local/x86_64-w64-mingw32/lib -L/home/sunorcio/Documents/slib/glew-2.2.0-win32/lib/Release/x64 -Wl,-Bstatic -lmingw32 -lSDL2main -lSDL2 -mwindows -lm -ldinput8 -ldxguid -ldxerr8 -luser32 -lgdi32 -lwinmm -limm32 -lole32 -loleaut32 -lshell32 -lversion -lsetupapi -lcfgmgr32 -luuid -static-libgcc -lglew32s -lopengl32 -lglu32 -DDBG -DGLEW_STATIC -O3
+
+i686-w64-mingw32-gcc matter_main.c -o win32.exe --static -I/usr/local/i686-w64-mingw32/include -I/home/sunorcio/Documents/slib/glew-2.2.0-win32/include -L/usr/local/i686-w64-mingw32/lib -L/home/sunorcio/Documents/slib/glew-2.2.0-win32/lib/Release/Win32 -Wl,-Bstatic -lmingw32 -lSDL2main -lSDL2 -mwindows -lm -ldinput8 -ldxguid -ldxerr8 -luser32 -lgdi32 -lwinmm -limm32 -lole32 -loleaut32 -lshell32 -lversion -lsetupapi -lcfgmgr32 -luuid -static-libgcc -lglew32s -lopengl32 -lglu32 -DDBG -DGLEW_STATIC -O3

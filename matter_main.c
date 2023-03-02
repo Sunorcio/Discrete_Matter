@@ -60,55 +60,45 @@ void loop()
 			}
 		}
 
-		if(SDL_GetTicks64()>worldclock+1000/30)
+	uint8_t speed = 1;
+		if(SDL_GetTicks64()>worldclock+1000/20)
 		{
 			worldclock = SDL_GetTicks64();
 
-			if(state[SDL_SCANCODE_A])
+			for(int i = 0;i<worldsize[0]*worldsize[1];i++)
 			{
-				for(int i = 0;i<worldsize[0]*worldsize[1];i++)
+				if(state[SDL_SCANCODE_A])
 				{
-					if(world[i].materialid==3 && world[i].forcex > -126)
-						{world[i].forcex -= 2;}
-				}
-			}
-			if(state[SDL_SCANCODE_D])
-			{
-				for(int i = 0;i<worldsize[0]*worldsize[1];i++)
+						if(world[i].materialid==2 && world[i].forcex > -127+speed-1)
+							{world[i].forcex -= speed;}
+				}else if(state[SDL_SCANCODE_D])
 				{
-					if(world[i].materialid==3 && world[i].forcex < 126)
-						{world[i].forcex += 2;}
+						if(world[i].materialid==2 && world[i].forcex < 127-speed+1)
+							{world[i].forcex += speed;}
 				}
-			}
-			if(state[SDL_SCANCODE_W])
-			{
-				for(int i = 0;i<worldsize[0]*worldsize[1];i++)
-				{
-					if(world[i].materialid==3 && world[i].forcey < 126)
-						{world[i].forcey += 2;}
-				}
-			}
-			if(state[SDL_SCANCODE_S])
-			{
-				for(int i = 0;i<worldsize[0]*worldsize[1];i++)
-				{
-					if(world[i].materialid==3 && world[i].forcey > -126)
-						{world[i].forcey -= 2;}
-				}
-			}
 
+				if(state[SDL_SCANCODE_S])
+				{
+						if(world[i].materialid==2 && world[i].forcey > -127+speed-1)
+							{world[i].forcey -= speed;}
+				}else if(state[SDL_SCANCODE_W])
+				{
+						if(world[i].materialid==2 && world[i].forcey < 127-speed+1)
+							{world[i].forcey += speed;}
+				}
+			}
 
 			worldLogic();
 			worldBufferUpdate(world);
 
-			_sdlgldbg( glUseProgram(compClear); )
-			_sdlgldbg( glDispatchCompute(worldsize[1],worldsize[0],1); )
-			_sdlgldbg( glUseProgram(compBuffer); )
-			_sdlgldbg( glDispatchCompute(worldsize[1],worldsize[0],1); )
+			glUseProgram(compClear);
+			glDispatchCompute(worldsize[1],worldsize[0],1);
+			glUseProgram(compBuffer);
+			glDispatchCompute(worldsize[1],worldsize[0],1);
 
 
-			_sdlgldbg( glUseProgram(renderProgram); )
-			_sdlgldbg( glDrawElements(GL_TRIANGLES, sizeof(eleid), GL_UNSIGNED_BYTE, 0); )
+			glUseProgram(renderProgram);
+			glDrawElements(GL_TRIANGLES, sizeof(eleid), GL_UNSIGNED_BYTE, 0);
 			SDL_GL_SwapWindow(sdlglWindow);
 		}
 	}
@@ -120,7 +110,7 @@ int main(int argc, char* argv[])
 	srand(time(0));
 	sdlglInit();
 	
-	_sdlgldbg( glClearColor(0.8,0.6,0.8,1.); )
+	glClearColor(0.8,0.6,0.8,1.);
 	setFullscreenWindow();
 	world = worldBufferCreate();
 	renderCreate();
@@ -131,10 +121,11 @@ int main(int argc, char* argv[])
 
 
 
+
 	renderDestroy();
 	worldBufferDestroy(&world);
 
-	catchSDLError(-1);
+	catchGLError();
 	int wawa;
 	glGetIntegerv(GL_MAX_TEXTURE_BUFFER_SIZE, &wawa);
 	SDL_Log("%d",wawa);

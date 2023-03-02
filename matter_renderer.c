@@ -10,8 +10,8 @@
 #include <SDL2/SDL_thread.h>
 #include <SDL2/SDL_rwops.h>
 #endif // ignore
-
-
+	
+	   
 #ifndef STD_DEF
 	#include <stdint.h>
 #endif
@@ -23,15 +23,15 @@
 typedef struct particle
 {
 	uint8_t materialid;
-	uint8_t stepnbond;	// [0xf0] = [ d , l , u , r ] = (step potential) , [0x0f] = [ ur? , u? , ul? , r? ] = (bonds)
+	uint8_t stepnbond;	// [0xf0] = [ d , l , u , r ] = (step potential) ; [0x0f] = [ ur? , u? , ul? , r? ] = (bonds)
 	int8_t forcey;
 	int8_t forcex;
-	uint16_t state; // ?
-	uint16_t clamp; // clamped mesh memory?
+		uint16_t state; // ?
+		uint16_t clamp; // clamped mesh memory?
 }node;
 
-//		640	360	(16:9)	^	480 360 (4:3)         (720/2 == 360, min target 1280 720)
-uint16_t worldsize[2] = {48*2,36*2}; // represented grid (x,y)
+//		640	360	(16:9)	^	480 360 (4:3)     ;    (720/2 == 360, min target : 1280.720 ^ 980.720)
+uint16_t worldsize[2] = {64,36}; // represented grid (x,y)
 
 void setFullscreenWindow()
 {
@@ -42,7 +42,6 @@ void setFullscreenWindow()
 	if(worldsize[0]/worldsize[1]>(float)display.w/display.h)
 		{glViewport(0,(display.h-display.w*worldsize[1]/worldsize[0])/2,display.w, display.w*worldsize[1]/worldsize[0]);}
 	else{glViewport((display.w-display.h*worldsize[0]/worldsize[1])/2,0,display.h*worldsize[0]/worldsize[1], display.h);}
-	catchSDLError(-1);
 }
 
 unsigned int bo;
@@ -56,50 +55,50 @@ node* worldBufferCreate()
 
 	compBuffer = glCreateProgram();
 	unsigned int cs = sdlglShaderCompileFile("bufferstate.comp",GL_COMPUTE_SHADER);
-	_sdlgldbg( glAttachShader(compBuffer,cs); )
-	_sdlgldbg( glLinkProgram(compBuffer); )
-	_sdlgldbg( glDetachShader(compBuffer,cs); )
-	_sdlgldbg( glDeleteShader(cs); )
+	glAttachShader(compBuffer,cs);
+	glLinkProgram(compBuffer);
+	glDetachShader(compBuffer,cs);
+	glDeleteShader(cs);
 
-	_sdlgldbg( compClear = glCreateProgram(); )
-	_sdlgldbg( cs = sdlglShaderCompileFile("clearbuffer.comp",GL_COMPUTE_SHADER); )
-	_sdlgldbg( glAttachShader(compClear,cs); )
-	_sdlgldbg( glLinkProgram(compClear); )
-	_sdlgldbg( glDetachShader(compClear,cs); )
-	_sdlgldbg( glDeleteShader(cs); )
+	compClear = glCreateProgram();
+	cs = sdlglShaderCompileFile("clearbuffer.comp",GL_COMPUTE_SHADER);
+	glAttachShader(compClear,cs);
+	glLinkProgram(compClear);
+	glDetachShader(compClear,cs);
+	glDeleteShader(cs);
 
 
-	_sdlgldbg( glGenBuffers(1,&bo); )
-	_sdlgldbg( glBindBuffer(GL_TEXTURE_BUFFER,bo); )
-	_sdlgldbg( glBufferData(GL_TEXTURE_BUFFER,sizeof(node)*worldsize[1]*worldsize[0],world,GL_DYNAMIC_DRAW); )
-	_sdlgldbg( glGenTextures(1, &texb); )
-	_sdlgldbg( glBindTexture(GL_TEXTURE_BUFFER, texb); )
-	_sdlgldbg( glTexBuffer(GL_TEXTURE_BUFFER,GL_RGBA16UI,bo); )
+	glGenBuffers(1,&bo);
+	glBindBuffer(GL_TEXTURE_BUFFER,bo);
+	glBufferData(GL_TEXTURE_BUFFER,sizeof(node)*worldsize[1]*worldsize[0],world,GL_DYNAMIC_DRAW);
+	glGenTextures(1, &texb);
+	glBindTexture(GL_TEXTURE_BUFFER, texb);
+	glTexBuffer(GL_TEXTURE_BUFFER,GL_RGBA16UI,bo);
 
-	_sdlgldbg( glGenTextures(1, &texo); )
-	_sdlgldbg( glBindTexture(GL_TEXTURE_2D, texo); )
-	_sdlgldbg( glTextureParameteri(texo,GL_TEXTURE_MIN_FILTER,GL_NEAREST); )
-	_sdlgldbg( glTextureParameteri(texo,GL_TEXTURE_MAG_FILTER,GL_NEAREST); )
-	_sdlgldbg( glTextureParameteri(texo,GL_TEXTURE_WRAP_S,GL_CLAMP_TO_EDGE); )
-	_sdlgldbg( glTextureParameteri(texo,GL_TEXTURE_WRAP_T,GL_CLAMP_TO_EDGE); )
-	_sdlgldbg( glTexImage2D(GL_TEXTURE_2D,0,GL_RGBA16F,worldsize[1]*2,worldsize[0]*2,0,GL_RGBA,GL_HALF_FLOAT,0); )
-	_sdlgldbg( glClearTexImage(texo,0,GL_RGBA,GL_HALF_FLOAT,0); )
-	_sdlgldbg( glBindImageTexture(0,texo,0,GL_FALSE,0,GL_WRITE_ONLY,GL_RGBA16F); )
+	glGenTextures(1, &texo);
+	glBindTexture(GL_TEXTURE_2D, texo);
+	glTextureParameteri(texo,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
+	glTextureParameteri(texo,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
+	glTextureParameteri(texo,GL_TEXTURE_WRAP_S,GL_CLAMP_TO_EDGE);
+	glTextureParameteri(texo,GL_TEXTURE_WRAP_T,GL_CLAMP_TO_EDGE);
+	glTexImage2D(GL_TEXTURE_2D,0,GL_RGBA16F,worldsize[1]*2,worldsize[0]*2,0,GL_RGBA,GL_HALF_FLOAT,0);
+	glClearTexImage(texo,0,GL_RGBA,GL_HALF_FLOAT,0);
+	glBindImageTexture(0,texo,0,GL_FALSE,0,GL_WRITE_ONLY,GL_RGBA16F);
 
 	return world;
 }
 void worldBufferUpdate(node* world)
 {
-	_sdlgldbg( glBufferData(GL_TEXTURE_BUFFER,sizeof(node)*worldsize[1]*worldsize[0],world,GL_DYNAMIC_DRAW); )
+	glBufferData(GL_TEXTURE_BUFFER,sizeof(node)*worldsize[1]*worldsize[0],world,GL_DYNAMIC_DRAW);
 }
 void worldBufferDestroy(node** world)
 {
-	_sdlgldbg( glDeleteProgram(compBuffer); )
-	_sdlgldbg( glDeleteProgram(compClear); )
-	_sdlgldbg( free(*world); )
-	_sdlgldbg( glDeleteTextures(1, &texo); )
-	_sdlgldbg( glDeleteTextures(1, &texb); )
-	_sdlgldbg( glDeleteBuffers(1,&bo); )
+	glDeleteProgram(compBuffer);
+	glDeleteProgram(compClear);
+	free(*world);
+	glDeleteTextures(1, &texo);
+	glDeleteTextures(1, &texb);
+	glDeleteBuffers(1,&bo);
 }
 
 
@@ -122,51 +121,51 @@ uint8_t eleid[] = {
 void renderCreate()
 {
 
-	_sdlgldbg( glGenVertexArrays(1,&vao); )
-	_sdlgldbg( glBindVertexArray(vao); )
+	glGenVertexArrays(1,&vao);
+	glBindVertexArray(vao);
 
-	_sdlgldbg( glGenBuffers(1,&vb); )
-	_sdlgldbg( glBindBuffer(GL_ARRAY_BUFFER,vb); )
-	_sdlgldbg( glBufferData(GL_ARRAY_BUFFER,sizeof(position),position,GL_STATIC_DRAW); )
+	glGenBuffers(1,&vb);
+	glBindBuffer(GL_ARRAY_BUFFER,vb);
+	glBufferData(GL_ARRAY_BUFFER,sizeof(position),position,GL_STATIC_DRAW);
 
-	_sdlgldbg( glGenBuffers(1,&eb); )
-	_sdlgldbg( glBindBuffer(GL_ELEMENT_ARRAY_BUFFER,eb); )
-	_sdlgldbg( glBufferData(GL_ELEMENT_ARRAY_BUFFER,sizeof(eleid),eleid,GL_STATIC_DRAW); )
+	glGenBuffers(1,&eb);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER,eb);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER,sizeof(eleid),eleid,GL_STATIC_DRAW);
 
-	_sdlgldbg( renderProgram = glCreateProgram(); )
-	_sdlgldbg( unsigned int vs = sdlglShaderCompileFile("render.vert",GL_VERTEX_SHADER); )
-	_sdlgldbg( unsigned int fs = sdlglShaderCompileFile("render.frag",GL_FRAGMENT_SHADER); )
-	_sdlgldbg( glAttachShader(renderProgram,vs); )
-	_sdlgldbg( glAttachShader(renderProgram,fs); )
-	_sdlgldbg( glLinkProgram(renderProgram); )
-	_sdlgldbg( glDetachShader(renderProgram,vs); )
-	_sdlgldbg( glDetachShader(renderProgram,fs); )
-	_sdlgldbg( glDeleteShader(vs); )
-	_sdlgldbg( glDeleteShader(fs); )
+	renderProgram = glCreateProgram();
+	unsigned int vs = sdlglShaderCompileFile("render.vert",GL_VERTEX_SHADER);
+	unsigned int fs = sdlglShaderCompileFile("render.frag",GL_FRAGMENT_SHADER);
+	glAttachShader(renderProgram,vs);
+	glAttachShader(renderProgram,fs);
+	glLinkProgram(renderProgram);
+	glDetachShader(renderProgram,vs);
+	glDetachShader(renderProgram,fs);
+	glDeleteShader(vs);
+	glDeleteShader(fs);
 
-	_sdlgldbg( int locpos = glGetAttribLocation(renderProgram, "pos"); )
+	int locpos = glGetAttribLocation(renderProgram, "pos");
 	if(locpos == -1){SDL_Log("pos not found");}
-	_sdlgldbg( glEnableVertexAttribArray(locpos); )
-	_sdlgldbg( glVertexAttribPointer(locpos,2,GL_FLOAT,GL_FALSE,sizeof(position[0])*4,0); )
+	glEnableVertexAttribArray(locpos);
+	glVertexAttribPointer(locpos,2,GL_FLOAT,GL_FALSE,sizeof(position[0])*4,0);
 
 	int locuv = glGetAttribLocation(renderProgram, "uv");
 	if(locuv == -1){SDL_Log("uv not found");}
-	_sdlgldbg( glEnableVertexAttribArray(locuv); )
-	_sdlgldbg( glVertexAttribPointer(locuv,2,GL_FLOAT,GL_FALSE,sizeof(position[0])*4,(void*)(sizeof(float)*2)); )
+	glEnableVertexAttribArray(locuv);
+	glVertexAttribPointer(locuv,2,GL_FLOAT,GL_FALSE,sizeof(position[0])*4,(void*)(sizeof(float)*2));
 
 	int loctex = glGetUniformLocation(renderProgram, "tex");
 	if(loctex == -1){SDL_Log("tex not found");}
 
-	_sdlgldbg( glActiveTexture(GL_TEXTURE0); )
+	glActiveTexture(GL_TEXTURE0);
 
 }
 void renderDestroy()
 {
-	_sdlgldbg( glUseProgram(0); )
-	_sdlgldbg( glDeleteProgram(renderProgram); )
-	_sdlgldbg( glDeleteBuffers(1,&vb); )
-	_sdlgldbg( glDeleteBuffers(1,&eb); )
-	_sdlgldbg( glDeleteVertexArrays(1,&vao); )
+	glUseProgram(0);
+	glDeleteProgram(renderProgram);
+	glDeleteBuffers(1,&vb);
+	glDeleteBuffers(1,&eb);
+	glDeleteVertexArrays(1,&vao);
 }
 
 
